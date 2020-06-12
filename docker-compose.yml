@@ -1,0 +1,59 @@
+version: '3.7'
+
+services:
+
+  eventstore:
+    container_name: trace-eventstore
+    image: eventstore/eventstore
+    ports:
+      - '2113:2113'
+      - '1113:1113'
+    environment:
+      EVENTSTORE_EXT_HTTP_PORT: 2113
+      EVENTSTORE_EXT_TCP_PORT: 1113
+      EVENTSTORE_RUN_PROJECTIONS: all
+      EVENTSTORE_START_STANDARD_PROJECTIONS: 'true'
+      PROJECTION_THREADS: 8
+
+  mongo:
+    container_name: trace-mongo
+    image: mongo
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongoadmin
+      MONGO_INITDB_ROOT_PASSWORD: secret
+
+  rabbitmq:
+    container_name: trace-rabbitmq
+    hostname: rabbitmq
+    image: rabbitmq:management-alpine
+    ports:
+      - '4369:4369'
+      - '5672:5672'
+      - '25672:25672'
+      - '15672:15672'
+
+  seq:
+    container_name: trace-seq
+    image: datalust/seq:latest
+    ports:
+      - 5341:80
+    environment:
+      - ACCEPT_EULA=Y
+
+  jaeger:
+    container_name: trace-jaeger
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "14268:14268"
+      - "9411:9411"
+
+networks:
+  default:
+    name: trace-talk
